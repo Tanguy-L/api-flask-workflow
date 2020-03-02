@@ -1,0 +1,20 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+
+[packages]
+flask = "*"
+flask-pymongo = "*"
+python-dotenv = "*"
+flask-socketio = "*"
+flask-jwt = "*"
+flask-bcrypt = "*"
+
+[requires]
+python_version = "3.6"
+
+[scripts]
+dev = "flask run --no-reload"
