@@ -2,6 +2,11 @@ from flask import Flask, render_template, jsonify
 from flask_pymongo import PyMongo
 from flask_socketio import SocketIO, emit
 from flask_bcrypt import Bcrypt
+import graphene
+from flask_graphql import GraphQLView
+from database import init_db
+from schema import schema
+from graphene_mongo import MongoengineObjectType
 from flask_jwt_extended import (
     JWTManager, 
     jwt_required, 
@@ -25,6 +30,10 @@ jwt = JWTManager(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
 mongo = PyMongo(app)
 
+app.add_url_rule(
+    "/graphql", view_func=GraphQLView.as_view("graphql", schema = schema, graphiql = True)
+)
+
 def identity(payload):
     user_id = payload['identity']
     return mongo.db.users.find({ "_id": user_id})
@@ -43,7 +52,7 @@ def refresh():
     return ret
 
 @socketio.on("register")
-def register():
+def register(newUser):
     user = {
         "name": 'Pierre',
         "password": "test",
@@ -52,18 +61,15 @@ def register():
 
     errors = []
 
-    name = mongo.db.users.find_one({'name': user['name']})
-    print(name)
-
-    if(mongo.db.users.find_one({'name': user['name']})):
+    if(mongo.db.users.find_one({'name': newUser['name']})):
         raise Exception("Username already defined")
 
-    if(mongo.db.users.find_one({'email': user['email']})):
+    if(mongo.db.users.find_one({'email': newUser['email']})):
         raise Exception("Email already defined")
 
-    user['password'] = bcrypt.generate_password_hash(user["password"])
-    user["password"] = str(user["password"])
-    mongo.db.users.insert(user)
+    newUser['password'] = bcrypt.generate_password_hash(user["password"])
+    newUser["password"] = str(newUser["password"])
+    mongo.db.users.insert(newUser)
     return "User Created"
 
 @socketio.on_error_default

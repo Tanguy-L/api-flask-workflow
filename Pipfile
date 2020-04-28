@@ -12,6 +12,9 @@ python-dotenv = "*"
 flask-socketio = "*"
 flask-bcrypt = "*"
 flask-jwt-extended = "*"
+graphene-mongo = "*"
+mongoengine = "*"
+flask-graphql = "*"
 
 [requires]
 python_version = "3.6"
